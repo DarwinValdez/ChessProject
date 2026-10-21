@@ -34,6 +34,24 @@ npm test             # Vitest: reglas de ajedrez, PGN/FEN, validación de conten
 npm run check        # las tres anteriores
 ```
 
+## Despliegue en Vercel
+
+El proyecto no necesita configuración especial ni variables de entorno obligatorias.
+
+1. En [vercel.com/new](https://vercel.com/new), importa el repositorio `DarwinValdez/ChessProject`.
+2. Vercel detecta Next.js automáticamente. Deja los valores por defecto:
+   - Install command: `npm ci` (usa `package-lock.json`)
+   - Build command: `next build`
+   - Node.js: 22.x (tomado de `engines` en `package.json`)
+3. Pulsa **Deploy**. La rama predeterminada del repositorio se publica en producción y cada push a otra
+   rama genera una vista previa.
+
+Opcional: si usas un dominio propio, define `NEXT_PUBLIC_SITE_URL` (ver `.env.example`) para que el
+sitemap, `robots.txt` y las URL canónicas usen ese dominio. Sin ella se usa el dominio de producción de Vercel.
+
+Incluido para producción: cabeceras de seguridad básicas, `sitemap.xml`, `robots.txt`, metadatos Open Graph
+e icono propio. En modo invitado no hay backend: el progreso vive en el navegador de cada usuario.
+
 ## Qué hay en la Fase 1
 
 - Dashboard con nivel estimado, tiempo, racha, precisión, dominio por área, temas débiles,

@@ -2,14 +2,22 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { themeScript } from "@/components/layout/theme";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+const description =
+  "Academia interactiva de ajedrez: aperturas, medio juego, táctica y finales con seguimiento real del progreso.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: { default: "Chess Academy", template: "%s · Chess Academy" },
-  description: "Academia interactiva de ajedrez: aperturas, medio juego, táctica y finales con seguimiento real del progreso.",
+  description,
+  applicationName: "Chess Academy",
+  openGraph: { type: "website", locale: "es_ES", siteName: "Chess Academy", title: "Chess Academy", description },
+  twitter: { card: "summary", title: "Chess Academy", description },
 };
 
 export const viewport: Viewport = {
