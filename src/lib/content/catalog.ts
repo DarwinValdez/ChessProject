@@ -5,10 +5,12 @@
  */
 import { aperturaItaliana } from "./courses/apertura-italiana";
 import { finalesPeones } from "./courses/finales-peones";
+import { finalesTorres } from "./courses/finales-torres";
+import { medioJuegoEstructuras } from "./courses/medio-juego-estructuras";
 import { tacticaBasica } from "./courses/tactica-basica";
 import type { Area, Course, Lesson, Level, Module } from "./types";
 
-export const COURSES: readonly Course[] = [finalesPeones, tacticaBasica, aperturaItaliana];
+export const COURSES: readonly Course[] = [finalesPeones, finalesTorres, tacticaBasica, medioJuegoEstructuras, aperturaItaliana];
 
 export const AREAS: readonly { id: Area; label: string; description: string }[] = [
   { id: "aperturas", label: "Aperturas", description: "Ideas, planes y repertorio, no solo jugadas." },

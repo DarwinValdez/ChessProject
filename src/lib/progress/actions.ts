@@ -1,6 +1,6 @@
 /** Pure state transitions on ProgressData. The store applies and persists them. */
 import { dayKey } from "./dates";
-import type { Attempt, Goals, ProgressData, StudyActivity } from "./schema";
+import type { Attempt, Goals, ProgressData, RepertoireEntry, StudyActivity } from "./schema";
 
 export type NewAttempt = Omit<Attempt, "id" | "at">;
 
@@ -65,4 +65,14 @@ export function setGoals(data: ProgressData, goals: Goals): ProgressData {
 /** Milliseconds since `startMs` (event handlers only), never negative. */
 export function elapsedSince(startMs: number): number {
   return Math.max(0, Date.now() - startMs);
+}
+
+/** Adds the entry, or removes it if it is already in the repertoire. */
+export function toggleRepertoire(data: ProgressData, entry: RepertoireEntry): ProgressData {
+  const current = data.repertoire ?? [];
+  const exists = current.some((e) => e.slug === entry.slug && e.color === entry.color);
+  return {
+    ...data,
+    repertoire: exists ? current.filter((e) => !(e.slug === entry.slug && e.color === entry.color)) : [...current, entry],
+  };
 }

@@ -42,6 +42,11 @@ export const goalsSchema = z.object({
   weeklyDays: z.number().int().min(1).max(7),
 });
 
+export const repertoireEntrySchema = z.object({
+  slug: z.string(),
+  color: z.enum(["blancas", "negras"]),
+});
+
 export const progressSchema = z.object({
   version: z.literal(PROGRESS_VERSION),
   attempts: z.array(attemptSchema),
@@ -50,11 +55,14 @@ export const progressSchema = z.object({
   studyTime: z.record(z.string(), z.record(z.string(), z.number().min(0))),
   goals: goalsSchema,
   lastLessonId: z.string().optional(),
+  /** Openings the student chose to study, per colour (added in phase 2; optional so v1 data stays valid). */
+  repertoire: z.array(repertoireEntrySchema).optional(),
 });
 
 export type Attempt = z.infer<typeof attemptSchema>;
 export type LessonProgress = z.infer<typeof lessonProgressSchema>;
 export type Goals = z.infer<typeof goalsSchema>;
+export type RepertoireEntry = z.infer<typeof repertoireEntrySchema>;
 export type ProgressData = z.infer<typeof progressSchema>;
 
 /** Study-time buckets: one per academy area plus the free analysis board. */

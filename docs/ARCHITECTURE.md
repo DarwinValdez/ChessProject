@@ -58,24 +58,46 @@ src/
 
 ### Fase 1 — Fundación ✅
 Arquitectura, diseño visual (tokens, tema), navegación, dashboard, catálogo, tablero 2D funcional,
-reproductor de lecciones y contenido inicial verificado. 54 tests.
+reproductor de lecciones y contenido inicial verificado.
+
+### Fase 2 — Academia ✅
+- **Aperturas:** biblioteca de 12 aperturas (`src/lib/content/openings/`) clasificadas por familias y grupos
+  (abiertas, semiabiertas, cerradas, semicerradas, hipermodernas, gambitos, sistemas para blancas, contra 1.e4,
+  contra 1.d4). Cada una con ECO, ideas, objetivos, estructuras, planes, casillas, desarrollo, trampas marcadas,
+  errores frecuentes, variantes, posiciones críticas y ejercicios. Todas las líneas se validan automáticamente.
+- **Repertorio:** el alumno elige aperturas por color; `openings/repertoire.ts` calcula qué respuestas del rival
+  quedan sin preparar. Las aperturas del repertorio entran en la sesión recomendada.
+- **Unidades de estudio** (`content/units.ts`): lecciones de curso y prácticas de apertura comparten el mismo
+  sistema de dominio, repasos y estadísticas.
+- **Cursos nuevos:** Finales de torres (Lucena, Philidor, torre detrás del peón), Medio juego (peón aislado,
+  columnas abiertas, caballo contra alfil malo, cómo formular un plan); lecciones nuevas de peón pasado alejado,
+  eliminación del defensor y mate de la coz.
+- **Entrenador por temas** (`/tactica/entrenamiento`): todos los ejercicios, filtrables por tema, área y
+  dificultad, ordenados por no vistos → fallados → más antiguos.
+- **Biblioteca y métodos** (`content/library.ts`): 12 obras de 9 autores con metadatos, área, nivel, conceptos,
+  lecciones relacionadas y estado legal; 14 métodos en 7 categorías, con descripciones propias (sin citas).
+
+**Política de verificación del contenido.** Todas las evaluaciones citadas se comprobaron con Stockfish 19.
+Cuando el motor (sin tablebases) ve varias jugadas equivalentes —p. ej. en el arranque de Lucena o de Philidor—
+la lección enseña el método como *recomendado* y el ejercicio se sitúa en el momento en que la jugada sí es
+única (7.Tc4 en Lucena, 3...Td1+/Tb6+ en Philidor). Cuando el motor ve igualdad en una posición "de manual"
+(columna abierta, caballo contra alfil malo), la lección lo dice y explica por qué.
 
 ### Pendiente
-- **Fase 2 — Academia:** biblioteca de aperturas por familias, constructor de repertorio, más cursos de finales
-  (Lucena, Philidor…), medio juego (sin cursos todavía), biblioteca de libros y métodos de entrenadores.
 - **Fase 3 — Análisis:** Stockfish WASM en Web Worker, árbol de variantes, evaluación, explorador de Lichess
-  (con caché y manejo de límites/errores).
+  (con caché y manejo de límites/errores). Importar partidas modelo desde una base verificada.
 - **Fase 4 — Datos:** Supabase (auth, PostgreSQL, RLS), migración del progreso de invitado, favoritos, notas,
   colecciones.
 - **Fase 5 — Personalización:** repetición espaciada por variante/concepto, plan diario/semanal adaptativo.
 - **Fase 6 — Administración:** editor de cursos, importación PGN, validación y publicación.
-- **Fase 7 — Calidad:** E2E automatizados, auditoría de accesibilidad, rendimiento, despliegue.
+- **Fase 7 — Calidad:** E2E automatizados, auditoría de accesibilidad, rendimiento, CSP estricta.
 
-### Limitaciones conocidas de la Fase 1
-- Sin motor: el tablero no muestra evaluaciones (lo indica explícitamente).
-- Variantes: jugar otra jugada desde una posición anterior reemplaza la línea; al importar PGN se avisa de que
-  las variantes se omiten.
-- Solo modo invitado; los textos de páginas aún no están todos en el diccionario i18n (sí la navegación, el
-  tablero y elementos comunes).
-- `npm audit` informa de 5 vulnerabilidades "high" en dependencias de `eslint-config-next` (solo desarrollo);
-  la corrección automática degradaría a Next 14, así que no se aplica.
+### Limitaciones conocidas
+- Sin motor en la app: el tablero no muestra evaluaciones (lo indica explícitamente).
+- Partidas modelo: solo referencias bibliográficas; las jugadas no se reproducen de memoria.
+- Faltan contenidos de la lista de la especificación: finales de piezas menores y de damas, finales avanzados,
+  más motivos tácticos (interferencia, sobrecarga, desviación…) y más módulos de medio juego.
+- La red del entorno de desarrollo no permite acceder a Lichess, editoriales ni catálogos: los enlaces de la
+  biblioteca son búsquedas en WorldCat/Gutenberg.
+- Solo modo invitado; textos de página aún no extraídos al diccionario i18n.
+- `npm audit`: 5 vulnerabilidades "high" en dependencias de `eslint-config-next` (solo desarrollo).

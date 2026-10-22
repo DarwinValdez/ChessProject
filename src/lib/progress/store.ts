@@ -8,7 +8,7 @@
 import { useSyncExternalStore } from "react";
 import * as actions from "./actions";
 import { LocalStorageRepository, MemoryRepository, type ProgressRepository, STORAGE_KEY } from "./repository";
-import { type Goals, type ProgressData, type StudyActivity, emptyProgress, goalsSchema } from "./schema";
+import { type Goals, type ProgressData, type RepertoireEntry, type StudyActivity, emptyProgress, goalsSchema } from "./schema";
 
 type Listener = () => void;
 
@@ -87,6 +87,9 @@ export const progressStore = {
     const parsed = goalsSchema.safeParse(goals);
     if (parsed.success) update((d) => actions.setGoals(d, parsed.data));
     return parsed.success;
+  },
+  toggleRepertoire(entry: RepertoireEntry) {
+    update((d) => actions.toggleRepertoire(d, entry));
   },
   exportJson(): string {
     return JSON.stringify(ensureLoaded(), null, 2);

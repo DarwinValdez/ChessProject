@@ -3,7 +3,8 @@
  * time. When there is not enough data, functions say so (null / empty)
  * instead of inventing a number.
  */
-import { AREAS, allLessons } from "@/lib/content/catalog";
+import { AREAS } from "@/lib/content/catalog";
+import { allStudyUnits } from "@/lib/content/units";
 import type { Area, Level } from "@/lib/content/types";
 import { addDays, dayKey, startOfWeek } from "./dates";
 import { type TopicState, lessonMastery } from "./mastery";
@@ -97,11 +98,11 @@ const emptyCounts = (): StateCounts => ({
 });
 
 export function areaProgress(data: ProgressData, now: Date): AreaProgress[] {
-  const lessons = allLessons();
+  const units = allStudyUnits();
   return AREAS.map(({ id, label }) => {
     const counts = emptyCounts();
-    const inArea = lessons.filter((ref) => ref.course.area === id);
-    for (const ref of inArea) counts[lessonMastery(ref.id, ref.lesson, data, now).state] += 1;
+    const inArea = units.filter((unit) => unit.area === id);
+    for (const unit of inArea) counts[lessonMastery(unit.id, unit.lesson, data, now).state] += 1;
     return { area: id, label, total: inArea.length, counts };
   });
 }

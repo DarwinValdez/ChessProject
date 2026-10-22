@@ -2,7 +2,7 @@ import type { Course } from "../types";
 
 /*
  * Original positions built for this course. Solutions and evaluations were
- * checked with Stockfish 19 (depth 22) on 2026-10-21.
+ * checked with Stockfish 19 (depth 22) on 2026-10-21 and 2026-10-22.
  */
 
 export const tacticaBasica: Course = {
@@ -11,7 +11,7 @@ export const tacticaBasica: Course = {
   area: "tactica",
   level: "principiante",
   summary:
-    "Mate en la última fila, ataque doble de caballo y clavada absoluta: los tres motivos que más partidas deciden en los primeros niveles.",
+    "Mate en la última fila, ataque doble, clavada, eliminación del defensor y el mate de la coz: los motivos que más partidas deciden.",
   outcomes: [
     "Reconocer un rey sin casillas de escape en la primera/octava fila.",
     "Buscar jaques que ataquen a la vez otra pieza.",
@@ -179,6 +179,100 @@ export const tacticaBasica: Course = {
               ],
               explanation:
                 "1.Tae1 (o 1.Tfe1) clava la dama contra el rey: no puede apartarse de la columna e. Lo mejor que tienen las negras es entregarla por la torre (1...Dxe1) y, tras recapturar, las blancas quedan con dama por torre.",
+              verification: "stockfish",
+            },
+                    ],
+        },
+        {
+          slug: "eliminacion-del-defensor",
+          title: "Eliminación del defensor",
+          summary: "Si una pieza sostiene la defensa del rey, cámbiala o captúrala aunque cueste material.",
+          objective: "Identificar y eliminar el defensor clave del enroque.",
+          concept: "Antes de atacar un objetivo, pregunta qué pieza lo defiende; si puedes eliminarla, el objetivo cae.",
+          estimatedMinutes: 6,
+          themes: ["eliminacion-del-defensor", "ataque-al-rey"],
+          source: "propio",
+          steps: [
+            {
+              id: "defensor-ejercicio",
+              kind: "exercise",
+              title: "El caballo de f6",
+              fen: "r4rk1/ppq2pp1/1bp2n2/6B1/8/2PB4/PPQ2PPP/R4RK1 w - - 0 1",
+              prompt: "Juegan las blancas. Encuentra la jugada más fuerte contra el enroque negro.",
+              themes: ["eliminacion-del-defensor", "ataque-al-rey"],
+              difficulty: 3,
+              solution: { options: [{ san: "Bxf6" }] },
+              hints: ["¿Qué pieza negra defiende h7 y cubre al rey?", "El alfil de g5 puede eliminarla."],
+              explanation:
+                "1.Axf6! elimina el único defensor del enroque. Si 1...gxf6, el rey queda desnudo y la dama blanca llega a h4 o h6 (Stockfish ≈ +5,2); si las negras no recapturan, se quedan con una pieza menos. No es un mate forzado inmediato: es una ventaja decisiva a largo plazo.",
+              refutations: {
+                Rae1: "1.Tae1 es una jugada sana, pero Stockfish la valora mucho peor (≈ +2,6 frente a +5,2): el caballo de f6 sigue defendiendo al rey.",
+                Bf5: "1.Af5 mantiene presión, pero no elimina al defensor (≈ +2,5 frente a +5,2).",
+                Qe2: "1.De2 prepara el ataque, pero el caballo de f6 sigue defendiendo (≈ +1,9 frente a +5,2).",
+              },
+              verification: "stockfish",
+            },
+            {
+              id: "defensor-pregunta",
+              kind: "question",
+              title: "Comprueba",
+              prompt: "¿Qué pregunta conviene hacerse antes de atacar un punto fuerte del rival?",
+              themes: ["eliminacion-del-defensor"],
+              choices: [
+                { id: "defensor", text: "¿Qué pieza lo defiende y puedo eliminarla?", correct: true, feedback: "Exacto: si eliminas el defensor, el punto queda indefenso." },
+                { id: "material", text: "¿Cuánto material tengo?", correct: false, feedback: "El material importa, pero la pregunta táctica clave es quién defiende el objetivo." },
+                { id: "tiempo", text: "¿Cuánto tiempo me queda en el reloj?", correct: false, feedback: "Útil en la práctica, pero no identifica el motivo táctico." },
+              ],
+            },
+          ],
+        },
+        {
+          slug: "mate-de-la-coz",
+          title: "El mate de la coz",
+          summary: "Jaques de caballo, sacrificio de dama y mate de caballo contra un rey ahogado por sus propias piezas.",
+          objective: "Ejecutar el mate de la coz (legado de Philidor).",
+          concept:
+            "Un rey rodeado por sus propias piezas puede recibir mate de un solo caballo; un sacrificio de dama puede obligar a una torre a taparle la última salida.",
+          estimatedMinutes: 6,
+          themes: ["red-de-mate", "atraccion", "combinacion"],
+          source: "propio",
+          steps: [
+            {
+              id: "coz-ejercicio",
+              kind: "exercise",
+              title: "Mate en cuatro",
+              fen: "r2qr2k/pp4pp/8/6N1/2Q5/8/PP3PPP/R5K1 w - - 0 1",
+              prompt: "Juegan las blancas y dan mate en cuatro jugadas. Las negras tienen más material: solo vale el mate.",
+              themes: ["red-de-mate", "atraccion", "combinacion"],
+              difficulty: 4,
+              solution: {
+                options: [
+                  {
+                    san: "Nf7+",
+                    reply: "Kg8",
+                    next: {
+                      options: [
+                        {
+                          san: "Nh6+",
+                          reply: "Kh8",
+                          next: { options: [{ san: "Qg8+", reply: "Rxg8", next: { options: [{ san: "Nf7#" }] } }] },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              hints: [
+                "Empieza con un jaque de caballo que obligue al rey a moverse.",
+                "Busca un jaque doble (caballo + dama en la diagonal a2-g8).",
+                "La dama se sacrifica en g8 para que una torre tape la última casilla del rey.",
+              ],
+              explanation:
+                "1.Cf7+ Rg8 2.Ch6+ (jaque doble) Rh8 (si 2...Rf8, 3.Df7#) 3.Dg8+! Txg8 4.Cf7#: el rey está rodeado por sus propias piezas. Stockfish confirma el mate en cuatro; cualquier otra primera jugada pierde la ventaja.",
+              refutations: {
+                h4: "1.h4? no hace nada contra el rey y las negras consolidan (Stockfish ≈ 0,00).",
+                Qf7: "1.Df7? amenaza, pero sin jaque las negras tienen tiempo de defenderse.",
+              },
               verification: "stockfish",
             },
           ],

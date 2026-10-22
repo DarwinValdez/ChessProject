@@ -5,7 +5,8 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Clock, Flame, Gauge, Pencil, P
 import Link from "next/link";
 import { type ReactNode, useMemo, useState } from "react";
 import { PageContainer } from "@/components/ui/PageHeader";
-import { allLessons, getLessonById, levelLabel } from "@/lib/content/catalog";
+import { levelLabel } from "@/lib/content/catalog";
+import { allStudyUnits, getUnit } from "@/lib/content/units";
 import { themeLabel } from "@/lib/content/themes";
 import { dayKey } from "@/lib/progress/dates";
 import { SESSION_LENGTHS, type SessionLength, buildSession } from "@/lib/progress/recommend";
@@ -159,11 +160,11 @@ function DashboardReady({ data }: { data: ProgressData }) {
   }, [data, now]);
   const session = useMemo(() => buildSession(data, now, sessionLength), [data, now, sessionLength]);
 
-  const last = data.lastLessonId ? getLessonById(data.lastLessonId) : undefined;
+  const last = data.lastLessonId ? getUnit(data.lastLessonId) : undefined;
   const isNew = data.attempts.length === 0 && Object.keys(data.lessons).length === 0;
   const openings = stats.areas.find((a) => a.area === "aperturas")!;
   const endgames = stats.areas.find((a) => a.area === "finales")!;
-  const lessonCount = allLessons().length;
+  const unitCount = allStudyUnits().length;
 
   return (
     <PageContainer>
@@ -181,18 +182,18 @@ function DashboardReady({ data }: { data: ProgressData }) {
           <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">{isNew ? "Bienvenido a la academia" : "Tu entrenamiento"}</h1>
           <p className="mt-1.5 max-w-2xl text-[15px] text-muted">
             {isNew
-              ? `Hay ${lessonCount} lecciones disponibles. Tus estadísticas aparecerán a medida que resuelvas ejercicios: aquí no se muestra ningún dato inventado.`
+              ? `Hay ${unitCount} unidades de estudio (lecciones y aperturas). Tus estadísticas aparecerán a medida que resuelvas ejercicios: aquí no se muestra ningún dato inventado.`
               : "Estadísticas calculadas a partir de tus intentos reales y del tiempo de estudio activo."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {last && (
-            <Link href={`/cursos/${last.course.slug}/${last.lesson.slug}`} className="btn-secondary">
-              <Play className="h-4 w-4" /> Continuar: {last.lesson.title}
+            <Link href={last.href} className="btn-secondary">
+              <Play className="h-4 w-4" /> Continuar: {last.title}
             </Link>
           )}
           {session[0] && (
-            <Link href={`/cursos/${session[0].ref.course.slug}/${session[0].ref.lesson.slug}`} className="btn-primary">
+            <Link href={session[0].unit.href} className="btn-primary">
               Iniciar sesión de {sessionLength} min <ArrowRight className="h-4 w-4" />
             </Link>
           )}
@@ -223,7 +224,7 @@ function DashboardReady({ data }: { data: ProgressData }) {
           icon={CheckCircle2}
           label="Aperturas dominadas"
           value={`${openings.counts["dominado-provisional"]} / ${openings.total}`}
-          detail="Lecciones con retención comprobada"
+          detail="Lecciones y aperturas con retención comprobada"
         />
         <StatTile
           icon={CheckCircle2}
@@ -258,13 +259,13 @@ function DashboardReady({ data }: { data: ProgressData }) {
             }
           >
             {session.length === 0 ? (
-              <p className="text-sm text-muted">No hay lecciones pendientes ni repasos programados hoy. ¡Buen trabajo!</p>
+              <p className="text-sm text-muted">No hay lecciones pendientes ni repasos programados hoy. Añade aperturas a tu repertorio para practicarlas.</p>
             ) : (
               <ol className="flex flex-col divide-y divide-border">
                 {session.map((item, i) => (
-                  <li key={item.ref.id}>
+                  <li key={item.unit.id}>
                     <Link
-                      href={`/cursos/${item.ref.course.slug}/${item.ref.lesson.slug}`}
+                      href={item.unit.href}
                       className="group flex items-center gap-3 py-3 first:pt-0 last:pb-0"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-medium text-muted">
@@ -272,7 +273,7 @@ function DashboardReady({ data }: { data: ProgressData }) {
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium group-hover:text-accent">{item.ref.lesson.title}</span>
+                          <span className="font-medium group-hover:text-accent">{item.unit.title}</span>
                           <span
                             className={clsx(
                               "rounded px-1.5 py-0.5 text-[11px] font-medium",
@@ -283,7 +284,7 @@ function DashboardReady({ data }: { data: ProgressData }) {
                           </span>
                         </span>
                         <span className="mt-0.5 block text-xs text-faint">
-                          {item.ref.course.title} · {item.ref.lesson.estimatedMinutes} min · {item.reason}
+                          {item.unit.context} · {item.unit.lesson.estimatedMinutes} min · {item.reason}
                         </span>
                       </span>
                       <ArrowRight className="h-4 w-4 shrink-0 text-faint group-hover:text-accent" aria-hidden />
@@ -309,8 +310,8 @@ function DashboardReady({ data }: { data: ProgressData }) {
                 <h3 className="label mb-2">Historial reciente</h3>
                 <ul className="flex flex-col gap-2 text-sm">
                   {stats.recent.map((event, i) => {
-                    const ref = getLessonById(event.lessonId);
-                    const step = ref?.lesson.steps.find((s) => s.id === event.stepId);
+                    const unit = getUnit(event.lessonId);
+                    const step = unit?.lesson.steps.find((s) => s.id === event.stepId);
                     return (
                       <li key={`${event.at}-${i}`} className="flex items-start gap-2">
                         {event.kind === "lesson-completed" ? (
@@ -324,7 +325,7 @@ function DashboardReady({ data }: { data: ProgressData }) {
                         )}
                         <span className="min-w-0 flex-1">
                           {event.kind === "lesson-completed" ? "Lección terminada: " : ""}
-                          <span className="font-medium">{ref?.lesson.title ?? event.lessonId}</span>
+                          <span className="font-medium">{unit?.title ?? event.lessonId}</span>
                           {step && <span className="text-muted"> · {step.title}</span>}
                           {event.kind === "attempt" && (
                             <span className="text-muted">

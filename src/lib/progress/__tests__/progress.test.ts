@@ -141,8 +141,8 @@ describe("session recommendations", () => {
   it("starts with the first lesson of each course for a new student, within the time budget", () => {
     const session = buildSession(emptyProgress(), at("2026-10-21T10:00:00"), 15);
     expect(session.length).toBeGreaterThan(0);
-    expect(session.every((s) => s.kind === "nuevo" && s.ref.index === 0)).toBe(true);
-    const minutes = session.reduce((sum, s) => sum + s.ref.lesson.estimatedMinutes, 0);
+    expect(session.every((s) => s.kind === "nuevo" && s.unit.order === 0 && !s.unit.optional)).toBe(true);
+    const minutes = session.reduce((sum, s) => sum + s.unit.lesson.estimatedMinutes, 0);
     expect(minutes).toBeLessThanOrEqual(15);
   });
 
@@ -151,8 +151,29 @@ describe("session recommendations", () => {
     d = actions.visitLesson(d, allLessons()[4].id, 0, at("2026-10-01T11:00:00"));
     const session = buildSession(d, at("2026-10-02T10:00:00"), 60);
     expect(session[0]).toMatchObject({ kind: "repaso" });
-    expect(session[0].ref.id).toBe(LESSON_ID);
+    expect(session[0].unit.id).toBe(LESSON_ID);
     expect(session[1]).toMatchObject({ kind: "continuar" });
+  });
+});
+
+describe("repertoire", () => {
+  it("toggles entries per colour and recommends only repertoire openings", () => {
+    let d = actions.toggleRepertoire(emptyProgress(), { slug: "defensa-caro-kann", color: "negras" });
+    d = actions.toggleRepertoire(d, { slug: "defensa-caro-kann", color: "blancas" });
+    expect(d.repertoire).toHaveLength(2);
+    d = actions.toggleRepertoire(d, { slug: "defensa-caro-kann", color: "blancas" });
+    expect(d.repertoire).toEqual([{ slug: "defensa-caro-kann", color: "negras" }]);
+
+    const withoutRep = buildSession(emptyProgress(), at("2026-10-21T10:00:00"), 60);
+    expect(withoutRep.some((s) => s.unit.optional)).toBe(false);
+    const withRep = buildSession(d, at("2026-10-21T10:00:00"), 60);
+    expect(withRep.map((s) => s.unit.id)).toContain("aperturas/defensa-caro-kann");
+  });
+
+  it("keeps phase 1 data valid (repertoire is optional)", () => {
+    const v1 = { ...emptyProgress() } as Record<string, unknown>;
+    delete v1.repertoire;
+    expect(parseProgress(JSON.stringify(v1)).recovered).toBe(false);
   });
 });
 

@@ -2,12 +2,13 @@ import type { Course } from "../types";
 
 /*
  * Every evaluation claimed here was checked with Stockfish 19 (depth 30)
- * on 2026-10-21; K+P vs K verdicts also match classical endgame theory.
+ * on 2026-10-21 (outside passed pawn: 2026-10-22); K+P vs K verdicts also match classical endgame theory.
  */
 
 const SQUARE_FEN = "7k/8/8/8/1p6/5K2/8/8 w - - 0 1";
 const KEY_SQUARES_FEN = "8/3k4/8/8/3K4/3P4/8/8 w - - 0 1";
 const OPPOSITION_FEN = "8/3k4/8/8/3K4/3P4/8/8 b - - 0 1";
+const OUTSIDE_FEN = "8/8/3k4/6p1/P2K2P1/8/8/8 w - - 0 1";
 
 export const finalesPeones: Course = {
   slug: "finales-de-peones-fundamentos",
@@ -244,6 +245,59 @@ export const finalesPeones: Course = {
                   correct: false,
                   feedback: "Sí lo están: misma columna y una casilla (d5) entre ellos.",
                 },
+              ],
+            },
+                    ],
+        },
+        {
+          slug: "peon-pasado-alejado",
+          title: "El peón pasado alejado",
+          summary: "Un peón pasado lejos del resto sirve de señuelo: desvía al rey rival mientras tu rey gana en el otro flanco.",
+          objective: "Usar el peón pasado alejado para desviar al rey rival.",
+          concept:
+            "En los finales de peones, el peón pasado más alejado obliga al rey rival a alejarse para detenerlo; mientras tanto, tu rey come los peones del otro flanco.",
+          estimatedMinutes: 7,
+          themes: ["peon-pasado", "rey-activo"],
+          result: "victoria-forzada-blancas",
+          source: "propio",
+          steps: [
+            {
+              id: "alejado-linea",
+              kind: "explain",
+              title: "El señuelo",
+              fen: OUTSIDE_FEN,
+              body: [
+                "Material igualado, pero el peón de a4 es un peón pasado alejado: el rey negro tendrá que ir a por él.",
+                "Mientras el rey negro captura en a4, el rey blanco come el peón de g5 y su propio peón de g corona.",
+                "Nota del motor: Stockfish confirma que las blancas ganan y que casi cualquier plan sensato lo consigue; lo importante es entender por qué.",
+              ],
+              line: [
+                { san: "Ke4", comment: "El rey se dirige al flanco de rey." },
+                { san: "Kc5", comment: "El rey negro va a por el peón de a4..." },
+                { san: "Kf5" },
+                { san: "Kb4" },
+                { san: "Kxg5", comment: "...pero el rey blanco ya ha capturado el peón de g5." },
+                { san: "Kxa4" },
+                { san: "Kf6", comment: "El peón de g corona: el rey negro está demasiado lejos." },
+                { san: "Kb5" },
+                { san: "g5" },
+                { san: "Kc6" },
+                { san: "g6" },
+                { san: "Kd7" },
+                { san: "g7" },
+              ],
+            },
+            {
+              id: "alejado-pregunta",
+              kind: "question",
+              title: "Comprueba",
+              fen: OUTSIDE_FEN,
+              prompt: "¿Por qué gana el peón pasado alejado aunque el material esté igualado?",
+              themes: ["peon-pasado"],
+              choices: [
+                { id: "senuelo", text: "Porque desvía al rey negro lejos del otro flanco", correct: true, feedback: "Correcto: el rey no puede estar en dos sitios a la vez." },
+                { id: "corona", text: "Porque corona sin que nadie pueda detenerlo", correct: false, feedback: "El rey negro sí puede capturarlo; lo importante es el tiempo que pierde haciéndolo." },
+                { id: "oposicion", text: "Por la oposición", correct: false, feedback: "Aquí la clave es la distancia entre los peones, no la oposición." },
               ],
             },
           ],

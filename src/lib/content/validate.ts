@@ -4,7 +4,8 @@
  * suite today and by the admin panel before publishing (phase 6).
  */
 import { checkFen, moveFromFen } from "@/lib/chess/game";
-import type { Arrow, Course, Lesson, LessonStep, UserTurn } from "./types";
+import type { Opening } from "./openings/types";
+import type { AnnotatedMove, Arrow, Course, Lesson, LessonStep, UserTurn } from "./types";
 
 export interface ValidationIssue {
   path: string;
@@ -51,7 +52,7 @@ function checkTurn(path: string, fen: string, turn: UserTurn, issues: Validation
   });
 }
 
-function validateStep(path: string, step: LessonStep, issues: ValidationIssue[]) {
+export function validateStep(path: string, step: LessonStep, issues: ValidationIssue[]) {
   if (step.kind === "question") {
     if (step.fen) {
       const fen = checkFen(step.fen);
@@ -118,5 +119,49 @@ export function validateCourse(course: Course): ValidationIssue[] {
       issues.push(...validateLesson(lesson, `${course.slug}/${lesson.slug}`));
     }
   }
+  return issues;
+}
+
+const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const ECO = /^[A-E]\d\d(–[A-E]\d\d)?$/;
+
+/** Plays an annotated line from `fen`; returns the final FEN or null. */
+function checkLine(path: string, fen: string, moves: AnnotatedMove[], issues: ValidationIssue[]): string | null {
+  let current: string | null = fen;
+  moves.forEach((move, i) => {
+    if (!current) return;
+    checkArrows(`${path}[${i}]`, move.arrows, issues);
+    current = playCanonical(`${path}[${i}]`, current, move.san, issues);
+  });
+  return current;
+}
+
+export function validateOpening(opening: Opening): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const base = `aperturas/${opening.slug}`;
+  if (!ECO.test(opening.eco)) issues.push({ path: base, message: `ECO no válido: ${opening.eco}` });
+  const lines = [opening.mainLine, ...opening.variations];
+  if (new Set(lines.map((l) => l.id)).size !== lines.length) issues.push({ path: base, message: "IDs de línea duplicados" });
+  for (const line of lines) {
+    if (line.eco && !ECO.test(line.eco)) issues.push({ path: `${base}/${line.id}`, message: `ECO no válido: ${line.eco}` });
+    if (line.moves.length === 0) issues.push({ path: `${base}/${line.id}`, message: "Línea vacía" });
+    checkLine(`${base}/${line.id}`, START, line.moves, issues);
+  }
+  for (const trap of opening.traps) {
+    const after = checkLine(`${base}/trampa:${trap.id}`, START, trap.moves.map((san) => ({ san })), issues);
+    if (after) checkLine(`${base}/trampa:${trap.id}/castigo`, after, trap.punishment, issues);
+    if (trap.punishment.length === 0) issues.push({ path: `${base}/trampa:${trap.id}`, message: "Trampa sin refutación" });
+  }
+  opening.mistakes.forEach((mistake, i) => {
+    if (mistake.moves) checkLine(`${base}/error[${i}]`, START, mistake.moves.map((san) => ({ san })), issues);
+  });
+  for (const pos of opening.critical) checkLine(`${base}/critica:${pos.id}`, START, pos.moves.map((san) => ({ san })), issues);
+  const ids = new Set<string>();
+  opening.exercises.forEach((step, i) => {
+    if (ids.has(step.id)) issues.push({ path: base, message: `ID de ejercicio duplicado: ${step.id}` });
+    ids.add(step.id);
+    validateStep(`${base}/ejercicios[${i}](${step.id})`, step, issues);
+  });
+  if (opening.exercises.length === 0) issues.push({ path: base, message: "La apertura no tiene ejercicios" });
   return issues;
 }

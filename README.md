@@ -3,7 +3,7 @@
 Academia interactiva de ajedrez: aperturas, medio juego, táctica y finales, con lecciones verificadas,
 ejercicios que registran intentos reales y un dashboard calculado solo a partir de esos datos.
 
-> Estado: **Fase 1 (fundación)** terminada. Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para el detalle
+> Estado: **Fases 1 (fundación) y 2 (academia)** terminadas. Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para el detalle
 > de lo implementado y lo pendiente.
 
 ## Requisitos
@@ -52,7 +52,7 @@ sitemap, `robots.txt` y las URL canónicas usen ese dominio. Sin ella se usa el 
 Incluido para producción: cabeceras de seguridad básicas, `sitemap.xml`, `robots.txt`, metadatos Open Graph
 e icono propio. En modo invitado no hay backend: el progreso vive en el navegador de cada usuario.
 
-## Qué hay en la Fase 1
+## Qué hay en las Fases 1 y 2
 
 - Dashboard con nivel estimado, tiempo, racha, precisión, dominio por área, temas débiles,
   objetivos semanales editables, calendario de actividad, historial y sesión recomendada (15/30/45/60 min).
@@ -61,8 +61,12 @@ e icono propio. En modo invitado no hay backend: el progreso vive en el navegado
   ejercicio (pistas progresivas, refutaciones, solución paso a paso solo tras intentarlo) y comprobación.
 - Tablero de análisis: jugadas legales (enroque, al paso, promoción con elección de pieza), jaque/mate/tablas,
   navegación, girar tablero, importar/exportar FEN y PGN.
-- 3 cursos / 8 lecciones iniciales, con todas las posiciones validadas automáticamente y las evaluaciones
-  comprobadas con Stockfish 19.
+- Biblioteca de 12 aperturas (ECO, ideas, planes, estructuras, trampas, variantes, posiciones críticas,
+  ejercicios) y constructor de repertorio con detección de huecos.
+- 5 cursos / 18 lecciones (finales de peones y de torres, táctica, medio juego, Italiana) y un entrenador
+  de ejercicios por temas.
+- Biblioteca de obras de referencia y métodos de entrenamiento con descripciones propias.
+- Todas las posiciones y líneas se validan automáticamente; las evaluaciones se comprobaron con Stockfish 19.
 - Tema claro/oscuro/sistema, diseño responsive, modo invitado (progreso en `localStorage`).
 
 ## Licencias de terceros

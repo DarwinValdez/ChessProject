@@ -1,13 +1,30 @@
+import { ListChecks } from "lucide-react";
 import type { Metadata } from "next";
-import { AreaPage } from "@/components/catalog/AreaPage";
+import Link from "next/link";
+import { CourseCatalog } from "@/components/catalog/CourseCatalog";
+import { OpeningLibrary } from "@/components/openings/OpeningLibrary";
+import { PageContainer, PageHeader } from "@/components/ui/PageHeader";
 
 export const metadata: Metadata = { title: "Aperturas" };
 
-export default function AperturasPage() {
+export default function OpeningsPage() {
   return (
-    <AreaPage
-      area="aperturas"
-      intro="Aprende por qué se juega cada movimiento y qué hacer cuando el rival se aparta de la teoría. La biblioteca completa por familias (abiertas, semiabiertas, cerradas, gambitos…) y el constructor de repertorio llegan en la Fase 2."
-    />
+    <PageContainer>
+      <PageHeader
+        eyebrow="Área de estudio"
+        title="Aperturas"
+        description="Biblioteca de aperturas con ideas, planes, estructuras, trampas y ejercicios. Aprende por qué se juega cada movimiento, no solo cuál."
+        actions={
+          <Link href="/aperturas/repertorio" className="btn-secondary">
+            <ListChecks className="h-4 w-4" /> Mi repertorio
+          </Link>
+        }
+      />
+      <OpeningLibrary />
+      <div className="mt-4 flex flex-col gap-4">
+        <h2 className="text-lg font-semibold tracking-tight">Cursos de aperturas</h2>
+        <CourseCatalog fixedArea="aperturas" />
+      </div>
+    </PageContainer>
   );
 }

@@ -1,34 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { BoardControls } from "@/components/board/BoardControls";
 import { ChessBoard } from "@/components/board/ChessBoard";
 import { MoveList } from "@/components/board/MoveList";
-import { useBoardKeys } from "@/hooks/useBoardKeys";
-import { moveFromFen, sideToMove } from "@/lib/chess/game";
+import { useLinePlayer } from "@/hooks/useLinePlayer";
+import { sideToMove } from "@/lib/chess/game";
 import type { ExplainStep } from "@/lib/content/types";
 import type { StepSlots } from "./types";
 
+const EMPTY: never[] = [];
+
 export function ExplainStepView({ step, slots }: { step: ExplainStep; slots: StepSlots }) {
-  const line = useMemo(() => step.line ?? [], [step.line]);
-  // Positions after each move of the line (validated content, so moves are legal).
-  const fens = useMemo(() => {
-    const list = [step.fen];
-    for (const m of line) {
-      const next = moveFromFen(list[list.length - 1], m.san);
-      if (!next) break;
-      list.push(next.fenAfter);
-    }
-    return list;
-  }, [step.fen, line]);
-  const moves = useMemo(() => line.slice(0, fens.length - 1).map((m, i) => ({ ...m, record: moveFromFen(fens[i], m.san)! })), [line, fens]);
-
-  const [cursor, setCursor] = useState(0);
-  const go = (ply: number) => setCursor(Math.max(0, Math.min(moves.length, ply)));
-  useBoardKeys({ back: () => go(cursor - 1), forward: () => go(cursor + 1), start: () => go(0), end: () => go(moves.length) });
-
-  const current = cursor > 0 ? moves[cursor - 1] : undefined;
-  const orientation = line.length > 0 ? "white" : sideToMove(step.fen) === "w" ? "white" : "black";
+  const player = useLinePlayer(step.fen, step.line ?? EMPTY);
+  const { moves, cursor, current, go } = player;
+  const orientation = moves.length > 0 && step.fen.startsWith("rnbqkbnr/pppppppp") ? "white" : sideToMove(step.fen) === "w" ? "white" : "black";
 
   return (
     <>
@@ -36,7 +21,7 @@ export function ExplainStepView({ step, slots }: { step: ExplainStep; slots: Ste
         <>
           <ChessBoard
             id={`explain-${step.id}`}
-            fen={fens[cursor]}
+            fen={player.fen}
             orientation={orientation}
             lastMove={current?.record}
             arrows={cursor === 0 ? step.arrows : current?.arrows}
@@ -49,8 +34,8 @@ export function ExplainStepView({ step, slots }: { step: ExplainStep; slots: Ste
                 onBack={() => go(cursor - 1)}
                 onForward={() => go(cursor + 1)}
                 onEnd={() => go(moves.length)}
-                canBack={cursor > 0}
-                canForward={cursor < moves.length}
+                canBack={player.canBack}
+                canForward={player.canForward}
               />
             </div>
           )}

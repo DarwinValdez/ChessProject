@@ -49,8 +49,8 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/tablero", label: t.nav.board, icon: Puzzle },
       { href: "/entrenador", label: t.nav.coach, icon: Target, phase: 5 },
-      { href: "/biblioteca", label: t.nav.library, icon: Library, phase: 2 },
-      { href: "/metodos", label: t.nav.coaches, icon: Users, phase: 2 },
+      { href: "/biblioteca", label: t.nav.library, icon: Library },
+      { href: "/metodos", label: t.nav.coaches, icon: Users },
       { href: "/admin", label: t.nav.admin, icon: Shield, phase: 6 },
     ],
   },
